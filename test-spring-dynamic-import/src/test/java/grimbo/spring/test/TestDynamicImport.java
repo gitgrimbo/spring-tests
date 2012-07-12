@@ -21,10 +21,13 @@ public class TestDynamicImport {
     }
 
     /**
-     * Expression in <import> does not work.
+     * Expression in <import>, which is expected to be resolved via a property
+     * in a property file, does not work. As the property file only loads when
+     * all XML files have been loaded, the expression cannot be resolved in
+     * time.
      */
     @Test
-    public void testUsePropertyExpressionInImportFails() {
+    public void testUsePropsFilePropertyExpressionInImportFails() {
         try {
             load("testUsePropertyExpressionInImportFails.xml");
             fail("Expected BeanDefinitionParsingException");
@@ -32,6 +35,22 @@ public class TestDynamicImport {
             FileNotFoundException fnfe = getCause(e, FileNotFoundException.class);
             assertNotNull("Expected to see a FileNotFoundException as root cause", fnfe);
         }
+    }
+
+    /**
+     * Expression in <import>, which is a system property expression, does work.
+     */
+    @Test
+    public void testUseSysPropPropertyExpressionInImportSucceeds() {
+        System.setProperty("fileName", "file1.xml");
+        load("testUseSysPropPropertyExpressionInImport.xml");
+        // loading file1.xml should cause bean1 to be present.
+        Bean bean = (Bean) ctx.getBean("bean1");
+        assertNotNull(bean);
+        assertEquals("bean1", bean.getName());
+        // loading file1.xml should cause bean2 to NOT be present.
+        assertFalse("bean2 should not exist", ctx.containsBean("bean2"));
+        assertEquals("Should only be one Bean created", 1, Bean.beans.size());
     }
 
     /**
@@ -46,7 +65,10 @@ public class TestDynamicImport {
         Bean bean = (Bean) ctx.getBean("bean");
         assertNotNull(bean);
         assertEquals("bean1", bean.getName());
-        assertEquals(1, Bean.beans.size());
+        // loading both file1.xml and file2.xml should cause bean1 and bean2 to
+        // be present as definitions.
+        assertTrue("bean2 should exist as a definition", ctx.containsBean("bean2"));
+        assertEquals("Should only be one Bean created", 1, Bean.beans.size());
     }
 
     /**
