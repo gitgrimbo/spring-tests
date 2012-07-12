@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+    <!--
+    No property file import.
+    -->
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
+
+    <!--
+    Import both files, but the beans are lazy-init so shouldn't be created until required.
+    -->
+
+    <import resource="file1.xml" />
+    <import resource="file2.xml" />
+
+    <!--
+    "bean" will point to the beanName we use in the properties file.
+    This bean will get created.
+    -->
+
+    <alias name="${beanName}" alias="bean" />
+
+</beans>
